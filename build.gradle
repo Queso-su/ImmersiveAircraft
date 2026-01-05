@@ -79,10 +79,7 @@ allprojects {
         withSourcesJar()
     }
 
-    // Disable test tasks to fix Gradle 8.13 compatibility issue
-    test {
-        enabled = false
-    }
+
 
 
 

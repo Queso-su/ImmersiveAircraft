@@ -13,77 +13,85 @@ import net.minecraft.world.entity.MobCategory;
 
 import java.util.function.Supplier;
 
-public interface Entities {
-    Supplier<EntityType<GyrodyneEntity>> GYRODYNE = register("gyrodyne", EntityType.Builder
-            .of(GyrodyneEntity::new, MobCategory.MISC)
-            .sized(1.3f, 0.6f)
-            .clientTrackingRange(12)
-            .fireImmune()
-    );
+public class Entities {
+    public static Supplier<EntityType<GyrodyneEntity>> GYRODYNE;
+    public static Supplier<EntityType<BiplaneEntity>> BIPLANE;
+    public static Supplier<EntityType<AirshipEntity>> AIRSHIP;
+    public static Supplier<EntityType<CargoAirshipEntity>> CARGO_AIRSHIP;
+    public static Supplier<EntityType<WarshipEntity>> WARSHIP;
+    public static Supplier<EntityType<QuadrocopterEntity>> QUADROCOPTER;
+    public static Supplier<EntityType<BambooHopperEntity>> BAMBOO_HOPPER;
+    public static Supplier<EntityType<BulletEntity>> BULLET;
+    public static Supplier<EntityType<TinyTNT>> TINY_TNT;
 
-    Supplier<EntityType<BiplaneEntity>> BIPLANE = register("biplane", EntityType.Builder
-            .of(BiplaneEntity::new, MobCategory.MISC)
-            .sized(1.75f, 0.85f)
-            .clientTrackingRange(12)
-            .fireImmune()
-    );
+    public static void bootstrap() {
+        GYRODYNE = register("gyrodyne", EntityType.Builder
+                .of(GyrodyneEntity::new, MobCategory.MISC)
+                .sized(1.3f, 0.6f)
+                .clientTrackingRange(12)
+                .fireImmune()
+        );
 
-    Supplier<EntityType<AirshipEntity>> AIRSHIP = register("airship", EntityType.Builder
-            .of(AirshipEntity::new, MobCategory.MISC)
-            .sized(1.5f, 3.0f)
-            .clientTrackingRange(12)
-            .fireImmune()
-    );
+        BIPLANE = register("biplane", EntityType.Builder
+                .of(BiplaneEntity::new, MobCategory.MISC)
+                .sized(1.75f, 0.85f)
+                .clientTrackingRange(12)
+                .fireImmune()
+        );
 
-    Supplier<EntityType<CargoAirshipEntity>> CARGO_AIRSHIP = register("cargo_airship", EntityType.Builder
-            .of(CargoAirshipEntity::new, MobCategory.MISC)
-            .sized(1.75f, 3.0f)
-            .clientTrackingRange(12)
-            .fireImmune()
-    );
+        AIRSHIP = register("airship", EntityType.Builder
+                .of(AirshipEntity::new, MobCategory.MISC)
+                .sized(1.5f, 3.0f)
+                .clientTrackingRange(12)
+                .fireImmune()
+        );
 
-    Supplier<EntityType<WarshipEntity>> WARSHIP = register("warship", EntityType.Builder
-            .of(WarshipEntity::new, MobCategory.MISC)
-            .sized(5.0f, 6.5f)
-            .clientTrackingRange(16)
-            .fireImmune()
-    );
+        CARGO_AIRSHIP = register("cargo_airship", EntityType.Builder
+                .of(CargoAirshipEntity::new, MobCategory.MISC)
+                .sized(1.75f, 3.0f)
+                .clientTrackingRange(12)
+                .fireImmune()
+        );
 
-    Supplier<EntityType<QuadrocopterEntity>> QUADROCOPTER = register("quadrocopter", EntityType.Builder
-            .of(QuadrocopterEntity::new, MobCategory.MISC)
-            .sized(1.5f, 0.5f)
-            .clientTrackingRange(10)
-            .fireImmune()
-    );
+        WARSHIP = register("warship", EntityType.Builder
+                .of(WarshipEntity::new, MobCategory.MISC)
+                .sized(5.0f, 6.5f)
+                .clientTrackingRange(16)
+                .fireImmune()
+        );
 
-    Supplier<EntityType<BambooHopperEntity>> BAMBOO_HOPPER = register("bamboo_hopper", EntityType.Builder
-            .of(BambooHopperEntity::new, MobCategory.MISC)
-            .sized(3.0f, 1.5f)
-            .clientTrackingRange(14)
-            .fireImmune()
-    );
+        QUADROCOPTER = register("quadrocopter", EntityType.Builder
+                .of(QuadrocopterEntity::new, MobCategory.MISC)
+                .sized(1.5f, 0.5f)
+                .clientTrackingRange(10)
+                .fireImmune()
+        );
 
-    Supplier<EntityType<BulletEntity>> BULLET = register("bullet", EntityType.Builder
-            .of(BulletEntity::new, MobCategory.MISC)
-            .sized(0.25f, 0.25f)
-            .clientTrackingRange(10)
-            .updateInterval(10)
-            .fireImmune()
-    );
+        BAMBOO_HOPPER = register("bamboo_hopper", EntityType.Builder
+                .of(BambooHopperEntity::new, MobCategory.MISC)
+                .sized(3.0f, 1.5f)
+                .clientTrackingRange(14)
+                .fireImmune()
+        );
 
-    Supplier<EntityType<TinyTNT>> TINY_TNT = register("tiny_tnt", EntityType.Builder
-            .of(TinyTNT::new, MobCategory.MISC)
-            .sized(0.375f, 0.375f)
-            .clientTrackingRange(10)
-            .updateInterval(10)
-            .fireImmune()
-    );
+        BULLET = register("bullet", EntityType.Builder
+                .of(BulletEntity::new, MobCategory.MISC)
+                .sized(0.25f, 0.25f)
+                .clientTrackingRange(10)
+                .updateInterval(10)
+                .fireImmune()
+        );
 
-    static void bootstrap() {
-
+        TINY_TNT = register("tiny_tnt", EntityType.Builder
+                .of(TinyTNT::new, MobCategory.MISC)
+                .sized(0.375f, 0.375f)
+                .clientTrackingRange(10)
+                .updateInterval(10)
+                .fireImmune()
+        );
     }
 
-    static <T extends Entity> Supplier<EntityType<T>> register(String name, EntityType.Builder<T> builder) {
+    private static <T extends Entity> Supplier<EntityType<T>> register(String name, EntityType.Builder<T> builder) {
         Identifier id = Main.locate(name);
         return Registration.register(BuiltInRegistries.ENTITY_TYPE, id, () -> builder.build(ResourceKey.create(BuiltInRegistries.ENTITY_TYPE.key(), id)));
     }
