@@ -22,7 +22,9 @@ public class NetworkHandlerImpl extends NetworkHandler.Impl {
     @SuppressWarnings("rawtypes")
     record MessageRegistryEntry(CustomPacketPayload.Type type,
                                 StreamCodec codec,
-                                IPayloadHandler payloadHandler) {
+                                IPayloadHandler payloadHandler,
+                                boolean hasClientHandler,
+                                boolean hasServerHandler) {
     }
 
     Map<String, List<MessageRegistryEntry>> messageRegistry = new HashMap<>();
@@ -37,7 +39,7 @@ public class NetworkHandlerImpl extends NetworkHandler.Impl {
                 serverHandler.handle(m, (ServerPlayer) c.player());
             }
         };
-        messageRegistry.get(namespace).add(new MessageRegistryEntry(type, codec, payloadHandler));
+        messageRegistry.get(namespace).add(new MessageRegistryEntry(type, codec, payloadHandler, clientHandler != null, serverHandler != null));
     }
 
     @Override
@@ -59,11 +61,15 @@ public class NetworkHandlerImpl extends NetworkHandler.Impl {
         final PayloadRegistrar registrar = event.registrar("1");
         //noinspection unchecked
         messageRegistry.values().forEach(channel ->
-                channel.forEach(entry -> registrar.playBidirectional(
-                        entry.type,
-                        entry.codec,
-                        entry.payloadHandler
-                ))
+                channel.forEach(entry -> {
+                    if (entry.hasClientHandler() && entry.hasServerHandler()) {
+                        registrar.playBidirectional(entry.type, entry.codec, entry.payloadHandler);
+                    } else if (entry.hasClientHandler()) {
+                        registrar.playToClient(entry.type, entry.codec, entry.payloadHandler);
+                    } else if (entry.hasServerHandler()) {
+                        registrar.playToServer(entry.type, entry.codec, entry.payloadHandler);
+                    }
+                })
         );
     }
 }

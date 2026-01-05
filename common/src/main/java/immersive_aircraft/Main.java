@@ -12,7 +12,7 @@ public final class Main {
     public static final String MOD_ID = "immersive_aircraft";
     public static String MOD_LOADER = "unknown";
     public static final Logger LOGGER = LogManager.getLogger();
-    public static MessageHandler messageHandler;
+    public static MessageHandler messageHandler = new immersive_aircraft.network.DefaultMessageHandler();
     public static CameraGetter cameraGetter = () -> Vec3.ZERO;
     public static FirstPersonGetter firstPersonGetter = () -> false;
     public static DebouncingGetter debouncingGetter = key -> false;

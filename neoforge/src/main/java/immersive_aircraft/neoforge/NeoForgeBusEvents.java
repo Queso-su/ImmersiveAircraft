@@ -52,7 +52,7 @@ public class NeoForgeBusEvents {
     public static void addReloadListenerEvent(AddServerReloadListenersEvent event) {
         if (DATA_REGISTRY != null) {
             for (PreparableReloadListener loader : DATA_REGISTRY.getLoaders()) {
-                event.addListener(Identifier.fromNamespaceAndPath(Main.MOD_ID, loader.getName()), loader);
+                event.addListener(Identifier.fromNamespaceAndPath(Main.MOD_ID, loader.getName().toLowerCase()), loader);
             }
         }
     }
