@@ -5,7 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 
-@Environment(EnvType.CLIENT)
+//@Environment(EnvType.CLIENT)
 public class DyeableVehicleEntityRenderState extends VehicleEntityRenderState {
     public int dyeColor;
     public int bodyColor;

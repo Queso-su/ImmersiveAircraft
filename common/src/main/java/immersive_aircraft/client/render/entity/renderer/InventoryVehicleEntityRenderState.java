@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
-@Environment(EnvType.CLIENT)
+//@Environment(EnvType.CLIENT)
 public class InventoryVehicleEntityRenderState extends DyeableVehicleEntityRenderState {
     public final List<Weapon> weapons;
     public final List<ItemStack> banners;

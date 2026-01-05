@@ -9,7 +9,7 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 
-@Environment(EnvType.CLIENT)
+//@Environment(EnvType.CLIENT)
 public class AircraftEntityRenderState extends InventoryVehicleEntityRenderState {
     public Vector3f windEffect;
     public final List<Trail> trails;

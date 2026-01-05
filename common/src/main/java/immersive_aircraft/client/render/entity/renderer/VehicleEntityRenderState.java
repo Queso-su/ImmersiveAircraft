@@ -13,7 +13,7 @@ import org.mariuszgromada.math.mxparser.Argument;
 
 import java.util.*;
 
-@Environment(EnvType.CLIENT)
+//@Environment(EnvType.CLIENT)
 public class VehicleEntityRenderState extends EntityRenderState {
     public float xRot;
     public float yRot;
