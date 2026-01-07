@@ -42,14 +42,10 @@ public class Utils {
 
         // Vanilla fuel
         if (Config.getInstance().acceptVanillaFuel) {
-            //do nothing
-            /*
-            int fuelTime = FuelRegistry.get(fuel, null, fuelValues);
+            int fuelTime = fuelValues.burnDuration(fuel);
             if (fuelTime > 0) {
                 return fuelTime;
             }
-
-             */
         }
 
         return 0;
