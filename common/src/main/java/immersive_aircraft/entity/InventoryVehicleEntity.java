@@ -17,6 +17,7 @@ import immersive_aircraft.item.upgrade.VehicleUpgradeRegistry;
 import immersive_aircraft.mixin.ServerPlayerEntityMixin;
 import immersive_aircraft.network.s2c.OpenGuiRequest;
 import immersive_aircraft.screen.VehicleScreenHandler;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -113,13 +114,19 @@ public abstract class InventoryVehicleEntity extends DyeableVehicleEntity implem
     public SparseSimpleInventory getInventory() {
         int inventorySize = getInventoryDescription().getInventorySize();
         if (inventorySize != inventory.getContainerSize()) {
+            // Save current items
+            NonNullList<ItemStack> items = inventory.getItems();
             initInventory();
+            // Restore items to the new inventory
+            for (int i = 0; i < Math.min(items.size(), inventory.getContainerSize()); i++) {
+                inventory.setItem(i, items.get(i));
+            }
         }
         return inventory;
     }
 
     @Override
-    public void containerChanged(Container sender) {
+    public void containerChanged(@NonNull Container sender) {
 
     }
 
@@ -177,6 +184,72 @@ public abstract class InventoryVehicleEntity extends DyeableVehicleEntity implem
     @Override
     protected void addAdditionalSaveData(@NotNull ValueOutput tag) {
         super.addAdditionalSaveData(tag);
+        
+        // Save items by slot type, preserving order and only saving non-empty slots
+        // Boiler items (fuel)
+        ValueOutput.TypedOutputList<ItemStack> boilerItems = tag.list("BoilerItems", ItemStack.CODEC);
+        for (SlotDescription slot : getInventoryDescription().getSlots(VehicleInventoryDescription.BOILER)) {
+            ItemStack itemStack = getInventory().getItem(slot.index());
+            if (!itemStack.isEmpty()) {
+                boilerItems.add(itemStack);
+            }
+        }
+        
+        // Booster items (rockets)
+        ValueOutput.TypedOutputList<ItemStack> boosterItems = tag.list("BoosterItems", ItemStack.CODEC);
+        for (SlotDescription slot : getInventoryDescription().getSlots(VehicleInventoryDescription.BOOSTER)) {
+            ItemStack itemStack = getInventory().getItem(slot.index());
+            if (!itemStack.isEmpty()) {
+                boosterItems.add(itemStack);
+            }
+        }
+        
+        // Weapon items
+        ValueOutput.TypedOutputList<ItemStack> weaponItems = tag.list("WeaponItems", ItemStack.CODEC);
+        for (SlotDescription slot : getInventoryDescription().getSlots(VehicleInventoryDescription.WEAPON)) {
+            ItemStack itemStack = getInventory().getItem(slot.index());
+            if (!itemStack.isEmpty()) {
+                weaponItems.add(itemStack);
+            }
+        }
+        
+        // Upgrade items
+        ValueOutput.TypedOutputList<ItemStack> upgradeItems = tag.list("UpgradeItems", ItemStack.CODEC);
+        for (SlotDescription slot : getInventoryDescription().getSlots(VehicleInventoryDescription.UPGRADE)) {
+            ItemStack itemStack = getInventory().getItem(slot.index());
+            if (!itemStack.isEmpty()) {
+                upgradeItems.add(itemStack);
+            }
+        }
+        
+        // Banner items
+        ValueOutput.TypedOutputList<ItemStack> bannerItems = tag.list("BannerItems", ItemStack.CODEC);
+        for (SlotDescription slot : getInventoryDescription().getSlots(VehicleInventoryDescription.BANNER)) {
+            ItemStack itemStack = getInventory().getItem(slot.index());
+            if (!itemStack.isEmpty()) {
+                bannerItems.add(itemStack);
+            }
+        }
+        
+        // Dye items
+        ValueOutput.TypedOutputList<ItemStack> dyeItems = tag.list("DyeItems", ItemStack.CODEC);
+        for (SlotDescription slot : getInventoryDescription().getSlots(VehicleInventoryDescription.DYE)) {
+            ItemStack itemStack = getInventory().getItem(slot.index());
+            if (!itemStack.isEmpty()) {
+                dyeItems.add(itemStack);
+            }
+        }
+        
+        // Inventory items (cargo)
+        ValueOutput.TypedOutputList<ItemStack> inventoryItems = tag.list("InventoryItems", ItemStack.CODEC);
+        for (SlotDescription slot : getInventoryDescription().getSlots(VehicleInventoryDescription.INVENTORY)) {
+            ItemStack itemStack = getInventory().getItem(slot.index());
+            if (!itemStack.isEmpty()) {
+                inventoryItems.add(itemStack);
+            }
+        }
+        
+        // For backward compatibility
         ValueOutput.TypedOutputList<ItemStack> list = tag.list("Inventory", ItemStack.CODEC);
         getInventory().storeAsItemList(list);
     }
@@ -184,8 +257,186 @@ public abstract class InventoryVehicleEntity extends DyeableVehicleEntity implem
     @Override
     protected void readAdditionalSaveData(@NotNull ValueInput tag) {
         super.readAdditionalSaveData(tag);
-        ValueInput.TypedInputList<ItemStack> list = tag.listOrEmpty("Inventory", ItemStack.CODEC);
-        getInventory().fromItemList(list);
+        
+        // Get inventory and ensure it's initialized with correct size
+        SparseSimpleInventory inventory = getInventory();
+        
+        // Clear inventory
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            inventory.setItem(i, ItemStack.EMPTY);
+        }
+        
+        // Try to load items by slot type (new format), preserving order and handling empty slots
+        boolean loadedByType = false;
+        
+        // Load boiler items (fuel)
+        ValueInput.TypedInputList<ItemStack> boilerItems = tag.listOrEmpty("BoilerItems", ItemStack.CODEC);
+        List<SlotDescription> boilerSlots = getInventoryDescription().getSlots(VehicleInventoryDescription.BOILER);
+        if (!boilerSlots.isEmpty()) {
+            loadedByType = true;
+            int itemIndex = 0;
+            for (ItemStack itemStack : boilerItems) {
+                if (itemIndex < boilerSlots.size()) {
+                    inventory.setItem(boilerSlots.get(itemIndex).index(), itemStack);
+                    itemIndex++;
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        // Load booster items (rockets)
+        ValueInput.TypedInputList<ItemStack> boosterItems = tag.listOrEmpty("BoosterItems", ItemStack.CODEC);
+        List<SlotDescription> boosterSlots = getInventoryDescription().getSlots(VehicleInventoryDescription.BOOSTER);
+        if (!boosterSlots.isEmpty()) {
+            loadedByType = true;
+            int itemIndex = 0;
+            for (ItemStack itemStack : boosterItems) {
+                if (itemIndex < boosterSlots.size()) {
+                    inventory.setItem(boosterSlots.get(itemIndex).index(), itemStack);
+                    itemIndex++;
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        // Load weapon items
+        ValueInput.TypedInputList<ItemStack> weaponItems = tag.listOrEmpty("WeaponItems", ItemStack.CODEC);
+        List<SlotDescription> weaponSlots = getInventoryDescription().getSlots(VehicleInventoryDescription.WEAPON);
+        if (!weaponSlots.isEmpty()) {
+            loadedByType = true;
+            int itemIndex = 0;
+            for (ItemStack itemStack : weaponItems) {
+                if (itemIndex < weaponSlots.size()) {
+                    inventory.setItem(weaponSlots.get(itemIndex).index(), itemStack);
+                    itemIndex++;
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        // Load upgrade items
+        ValueInput.TypedInputList<ItemStack> upgradeItems = tag.listOrEmpty("UpgradeItems", ItemStack.CODEC);
+        List<SlotDescription> upgradeSlots = getInventoryDescription().getSlots(VehicleInventoryDescription.UPGRADE);
+        if (!upgradeSlots.isEmpty()) {
+            loadedByType = true;
+            int itemIndex = 0;
+            for (ItemStack itemStack : upgradeItems) {
+                if (itemIndex < upgradeSlots.size()) {
+                    inventory.setItem(upgradeSlots.get(itemIndex).index(), itemStack);
+                    itemIndex++;
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        // Load banner items
+        ValueInput.TypedInputList<ItemStack> bannerItems = tag.listOrEmpty("BannerItems", ItemStack.CODEC);
+        List<SlotDescription> bannerSlots = getInventoryDescription().getSlots(VehicleInventoryDescription.BANNER);
+        if (!bannerSlots.isEmpty()) {
+            loadedByType = true;
+            int itemIndex = 0;
+            for (ItemStack itemStack : bannerItems) {
+                if (itemIndex < bannerSlots.size()) {
+                    inventory.setItem(bannerSlots.get(itemIndex).index(), itemStack);
+                    itemIndex++;
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        // Load dye items
+        ValueInput.TypedInputList<ItemStack> dyeItems = tag.listOrEmpty("DyeItems", ItemStack.CODEC);
+        List<SlotDescription> dyeSlots = getInventoryDescription().getSlots(VehicleInventoryDescription.DYE);
+        if (!dyeSlots.isEmpty()) {
+            loadedByType = true;
+            int itemIndex = 0;
+            for (ItemStack itemStack : dyeItems) {
+                if (itemIndex < dyeSlots.size()) {
+                    inventory.setItem(dyeSlots.get(itemIndex).index(), itemStack);
+                    itemIndex++;
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        // Load inventory items (cargo)
+        ValueInput.TypedInputList<ItemStack> inventoryItems = tag.listOrEmpty("InventoryItems", ItemStack.CODEC);
+        List<SlotDescription> inventorySlots = getInventoryDescription().getSlots(VehicleInventoryDescription.INVENTORY);
+        if (!inventorySlots.isEmpty()) {
+            loadedByType = true;
+            int itemIndex = 0;
+            for (ItemStack itemStack : inventoryItems) {
+                if (itemIndex < inventorySlots.size()) {
+                    inventory.setItem(inventorySlots.get(itemIndex).index(), itemStack);
+                    itemIndex++;
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        // If not loaded by type, use old format for backward compatibility
+        if (!loadedByType) {
+            ValueInput.TypedInputList<ItemStack> list = tag.listOrEmpty("Inventory", ItemStack.CODEC);
+            
+            // Get slot descriptions by type
+            Map<String, List<SlotDescription>> slotsByType = new HashMap<>();
+            for (SlotDescription slot : getInventoryDescription().getSlots()) {
+                slotsByType.computeIfAbsent(slot.type(), k -> new ArrayList<>()).add(slot);
+            }
+            
+            // Separate items by type
+            Map<String, List<ItemStack>> itemsByType = new HashMap<>();
+            for (ItemStack itemStack : list) {
+                if (itemsByType.size() >= inventory.getContainerSize()) {
+                    break;
+                }
+                
+                // Determine item type
+                String itemType = "inventory"; // Default to inventory
+                if (!itemStack.isEmpty()) {
+                    // Check which slot type can accept this item
+                    for (Map.Entry<String, List<SlotDescription>> entry : slotsByType.entrySet()) {
+                        String slotType = entry.getKey();
+                        List<SlotDescription> slots = entry.getValue();
+                        if (!slots.isEmpty()) {
+                            SlotDescription slot = slots.get(0);
+                            Slot slotInstance = slot.getSlot(this, inventory);
+                            if (slotInstance.mayPlace(itemStack)) {
+                                itemType = slotType;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                itemsByType.computeIfAbsent(itemType, k -> new ArrayList<>()).add(itemStack);
+            }
+            
+            // Fill items into slots by type
+            for (Map.Entry<String, List<ItemStack>> entry : itemsByType.entrySet()) {
+                String itemType = entry.getKey();
+                List<ItemStack> items = entry.getValue();
+                List<SlotDescription> slots = slotsByType.get(itemType);
+                if (slots != null) {
+                    int itemIndex = 0;
+                    for (ItemStack itemStack : items) {
+                        if (itemIndex < slots.size()) {
+                            inventory.setItem(slots.get(itemIndex).index(), itemStack);
+                            itemIndex++;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -199,6 +450,9 @@ public abstract class InventoryVehicleEntity extends DyeableVehicleEntity implem
     public void readItemTag(ItemStack stack) {
         super.readItemTag(stack);
 
+        // Ensure inventory is initialized with correct size before loading items
+        getInventory();
+        
         ItemContainerContents contents = stack.get(DataComponents.CONTAINER);
         if (contents != null) {
             contents.copyInto(getInventory().getItems());
@@ -321,18 +575,8 @@ public abstract class InventoryVehicleEntity extends DyeableVehicleEntity implem
 
     @Override
     public SlotAccess getSlot(int slot) {
-        return new SlotAccess() {
-            @Override
-            public @NonNull ItemStack get() {
-                return getInventory().getItem(slot);
-            }
 
-            @Override
-            public boolean set(@NonNull ItemStack stack) {
-                getInventory().setItem(slot, stack);
-                return true;
-            }
-        };
+        return SlotAccess.of(() -> getInventory().getItem(slot), stack -> getInventory().setItem(slot, stack));
     }
 
     public Map<Integer, List<Weapon>> getWeapons() {

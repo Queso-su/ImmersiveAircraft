@@ -31,13 +31,17 @@ public class SparseSimpleInventory extends SimpleContainer {
         for (ItemStack itemStack : typedInputList) {
             if (j < this.getContainerSize()) {
                 this.setItem(j, itemStack);
+            } else {
+                break;
             }
+            j++;
         }
     }
 
     @Override
     public void storeAsItemList(ValueOutput.TypedOutputList<ItemStack> typedOutputList) {
-        for (ItemStack itemStack : this.tracked) {
+        for (int i = 0; i < this.getContainerSize(); i++) {
+            ItemStack itemStack = this.getItem(i);
             if (!itemStack.isEmpty()) {
                 typedOutputList.add(itemStack);
             }

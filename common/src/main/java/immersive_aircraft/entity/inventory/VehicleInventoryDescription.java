@@ -1,6 +1,7 @@
 package immersive_aircraft.entity.inventory;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import immersive_aircraft.entity.inventory.slots.*;
 import immersive_aircraft.item.WeaponItem;
@@ -25,10 +26,11 @@ public class VehicleInventoryDescription {
     final List<Rect2iCommon> rectangles = new LinkedList<>();
 
     public VehicleInventoryDescription() {
-
+        lastIndex = 0;
     }
 
     public VehicleInventoryDescription(RegistryFriendlyByteBuf buffer) {
+        lastIndex = 0;
         int slotCount = buffer.readInt();
         for (int i = 0; i < slotCount; i++) {
             String type = buffer.readUtf();
@@ -43,7 +45,9 @@ public class VehicleInventoryDescription {
     }
 
     public VehicleInventoryDescription(JsonArray inventorySlots) {
-        inventorySlots.forEach(jsonElement -> {
+        lastIndex = 0;
+        for (int i = 0; i < inventorySlots.size(); i++) {
+            JsonElement jsonElement = inventorySlots.get(i);
             JsonObject slot = jsonElement.getAsJsonObject();
             int cols = Utils.getIntElement(slot, "cols", 1);
             int rows = Utils.getIntElement(slot, "rows", 1);
@@ -57,7 +61,7 @@ public class VehicleInventoryDescription {
             }
 
             addSlots(type, x, y, cols, rows, boxed, slot);
-        });
+        }
         build();
     }
 

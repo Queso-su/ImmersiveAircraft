@@ -52,7 +52,7 @@ def getAppVersion = { ->
         }
         def tag = stdout.toString().trim()
         if (tag.isEmpty()) {
-            return rootProject.minecraft_version + "-SNAPSHOT"
+            return rootProject.minecraft_version + "-SNAPSHOT3"
         }
         return tag
     } catch (Exception e) {

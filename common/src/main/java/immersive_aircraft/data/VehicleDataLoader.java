@@ -14,6 +14,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class VehicleDataLoader extends SimpleJsonResourceReloadListener<JsonElement> {
@@ -30,7 +31,10 @@ public class VehicleDataLoader extends SimpleJsonResourceReloadListener<JsonElem
     protected void apply(Map<Identifier, JsonElement> jsonMap, ResourceManager manager, ProfilerFiller profiler) {
         REGISTRY.clear();
 
-        jsonMap.forEach((identifier, jsonElement) -> {
+        // Use LinkedHashMap to preserve insertion order
+        Map<Identifier, JsonElement> orderedJsonMap = new LinkedHashMap<>(jsonMap);
+        
+        orderedJsonMap.forEach((identifier, jsonElement) -> {
             try {
                 VehicleData data = new VehicleData(jsonElement.getAsJsonObject());
                 REGISTRY.put(identifier, data);
