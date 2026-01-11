@@ -22,17 +22,14 @@ public class BBKeyframe {
         this.expressions[2] = getExpression(point, "z");
     }
 
+    // 采用1.21版本的方式，在创建表达式时就添加参数
     private static Expression getExpression(JsonObject point, String x) {
-        return new Expression(point.getAsJsonPrimitive(x).getAsString().replace("variable.", "variable_"));
+        return new Expression(point.getAsJsonPrimitive(x).getAsString().replace("variable.", "variable_"), BBAnimationVariables.getArgumentArray());
     }
 
+    // 采用1.21版本的无参数评估方法
     public Vector3f evaluate(BBAnimationVariables vars) {
-        this.expressions[0].removeAllArguments();
-        this.expressions[0].addArguments(vars.getArgumentArray());
-        this.expressions[1].removeAllArguments();
-        this.expressions[1].addArguments(vars.getArgumentArray());
-        this.expressions[2].removeAllArguments();
-        this.expressions[2].addArguments(vars.getArgumentArray());
+        // 直接计算表达式值，不需要每次都添加参数
         return new Vector3f(
                 (float) this.expressions[0].calculate(),
                 (float) this.expressions[1].calculate(),
