@@ -55,6 +55,18 @@ shadowJar {
     archiveClassifier = "dev-shadow"
 }
 
+jar {
+    archiveBaseName = "${rootProject.archives_base_name}-neoforge"
+}
+
+shadowJar {
+    archiveBaseName = "${rootProject.archives_base_name}-neoforge"
+}
+
+remapJar {
+    archiveBaseName = "${rootProject.archives_base_name}-neoforge"
+}
+
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar

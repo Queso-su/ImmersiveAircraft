@@ -58,6 +58,18 @@ shadowJar {
     archiveClassifier = "dev-shadow"
 }
 
+jar {
+    archiveBaseName = "${rootProject.archives_base_name}-fabric"
+}
+
+shadowJar {
+    archiveBaseName = "${rootProject.archives_base_name}-fabric"
+}
+
+remapJar {
+    archiveBaseName = "${rootProject.archives_base_name}-fabric"
+}
+
 remapJar {
     injectAccessWidener = true
     input.set shadowJar.archiveFile
