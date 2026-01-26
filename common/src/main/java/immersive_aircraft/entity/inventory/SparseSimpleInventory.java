@@ -67,7 +67,9 @@ public class SparseSimpleInventory extends SimpleContainer {
                 tracked.set(index, stack.copy());
                 entity.level().players().forEach(p -> {
                     if (!(p.containerMenu instanceof VehicleScreenHandler vehicleScreenHandler && vehicleScreenHandler.getVehicle() == entity)) {
-                        NetworkHandler.sendToPlayer(new InventoryUpdateMessage(entity, index, stack), (ServerPlayer) p);
+                        // 修复：只发送非空物品栈，避免序列化错误
+                        ItemStack sendStack = stack.isEmpty() ? ItemStack.EMPTY : stack;
+                        NetworkHandler.sendToPlayer(new InventoryUpdateMessage(entity, index, sendStack), (ServerPlayer) p);
                     }
                 });
             }
